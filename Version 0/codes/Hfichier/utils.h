@@ -4,7 +4,7 @@
 //structure de jeu
 typedef struct jeu{
         char nomJeu[25];
-        void * code;
+        char * code;
 }jeu;
 
 //structure de demandeOperation
@@ -15,14 +15,6 @@ typedef struct demandeOperation{
         int flag;
 }demandeOperation;
 
-//	procedure init
-//initialise la "base de données"
-void init_server(jeu* jeux);
-
-//	procedure show
-//affiche l'état de la "base de données"
-void show_server(jeu* jeux);
-
 //	fonction execute
-//renvoi 0 si la fonction est bien terminé, sinon -1
+//renvoie 0 si la fonction est bien terminé, sinon -1
 int execute_demande(demandeOperation op);
