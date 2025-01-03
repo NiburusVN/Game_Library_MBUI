@@ -2,8 +2,7 @@
 #include "Cfichier/utils.c"
 
 int main() {
-    srand(time(NULL)); // Initialisation du générateur de nombres aléatoires
-
+    
     // Exemple avec une seule demande d'ajout
     demandeOperation DeO1 = {1, "Echec", "", 0};
     int res = execute_demande(DeO1);
