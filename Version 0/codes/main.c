@@ -2,7 +2,7 @@
 #include "Cfichier/utils.c"
 
 int main() {
-    
+
     // Exemple avec une seule demande d'ajout
     demandeOperation DeO1 = {1, "Echec", "", 0};
     int res = execute_demande(DeO1);
@@ -17,8 +17,6 @@ int main() {
     demandeOperation DeO3 = {2, "", "", 0};
     res = execute_demande(DeO3);
     printf("Résultat : %d \n", res);
-
-
 
     // Simuler un combat
     demandeOperation DeO5 = {5, "Echec", "", 0};
