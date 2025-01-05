@@ -3,65 +3,184 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <pthread.h>
 #include "Hfichier/utils.h"
 #include "Cfichier/utils.c"
 
 // Variables globales pour la gestion des processus et des jeux
-int nbFilsNonBloquants = 0;
-int *resultF = NULL;
-int *pidF = NULL;
 jeu *jeux = NULL;
 int nbJeux = 0;
 
+threadResult* threadsNonBloquants = NULL;
+int nbThreadsNonBloquants = 0;
+
+char memoire[1000];
+
+void clear_input_buffer() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF) { }
+}
+
 int main() {
-    // Ajouter un jeu en mode non bloquant
-    demandeOperation DeO1 = {3, "Echec", "http://echecetmat.com/", 1};  // flag = 0 pour non bloquant
-    int res = execute_demande(DeO1);
-    printf("Résultat ajout Echec : %d \n\n\n", res);
+    
+    bool isLeaving = false;
 
-    // Afficher les jeux disponibles
-    demandeOperation DeO2 = {2, "", "", 0};
-    res = execute_demande(DeO2);
+    printf("[!INFORMATION!] - Bienvenue sur votre application de jeux !\n\n");
+    while(!isLeaving){
+        pthread_t thread;
+        char inputChoix;
+        int inputCodeOp;
+        int inputFlag;
+        char inputNomJeu[26] = "";
+        char inputParam[100] = "";
 
-    // Ajouter un autre jeu en mode non bloquant
-    demandeOperation DeO3 = {3, "Go", "http://goettic.com", 1};  // flag = 0 pour non bloquant
-    res = execute_demande(DeO3);
-    printf("Résultat ajout Go : %d \n\n\n", res);
+        sleep(2);
+        printf("[!INFORMATION!] - Voulez-vous formuler une demande d'opération ? ( q ) pour quitter sinon ( p ) pour poursuivre.\n\n");
 
-    // Afficher les jeux disponibles
-    demandeOperation DeO4 = {2, "", "", 1};
-    res = execute_demande(DeO4);
-    printf("Résultat du listage : %d \n\n\n", res);
+        sleep(1);
+        printf("Votre choix : ");
 
-    // Simuler un combat
-    demandeOperation DeO5 = {5, "Echec", "", 1};
-    res = execute_demande(DeO5);
-    printf("Valeur de retour du combat : %d \n\n\n", res);
+        scanf("%c", &inputChoix);
+        clear_input_buffer();
 
-    // Vérifie si le fils a terminé
-    int status;
-    pid_t kidPid;
+        printf("\n\n\n");
+
+        if(inputChoix == 'q'){
+            isLeaving = true;
+        }
+
+
+        else{
+            demandeOperation op;
+
+            sleep(1);
+            printf("[!INFORMATION!] - Veuillez formuler votre demande pour une opération :\n- ( 1 ) Tester si le jeu demandé est présent dans votre bibliothèque\n- ( 2 ) Lister vos jeux disponibles et téléchargés dans votre bibliothèque.\n- ( 3 ) Ajouter un nouvau jeu dans votre bibliothèque.\n- ( 4 ) Supprimer le jeu demandé de votre bibliothèque.\n- ( 5 ) Simuler un combat automatique sur un jeu demandé.\n- ( 6 ) Lancer le jeu demandé.\n\n");
+
+
+            do{
+                sleep(1);
+                printf("Votre choix : ");
+
+                scanf("%d", &inputCodeOp);
+                clear_input_buffer();
+
+                if(inputCodeOp < 1 || inputCodeOp > 6){
+                    sleep(1);
+                    printf("\n\nNuméro d'opération invalide ! (RAPPEL : numéro compris entre 1 et 6)\n");
+                }
+            } while(inputCodeOp < 1 || inputCodeOp > 6);
+
+            printf("\n\n\n");
+
+            op.codeOp = inputCodeOp;
+
+            if(inputCodeOp != 2){
+
+
+                do{
+                    sleep(1);
+                    printf("Donnez le nom du jeu que vous voulez choisir pour votre opération :\n\n");
+
+                    sleep(1);
+                    printf("Votre choix : ");
+
+                    fgets(inputNomJeu, sizeof(inputNomJeu), stdin);
+                    clear_input_buffer();
+
+                    if (inputNomJeu[strlen(inputNomJeu) - 1] == '\n') {
+                        inputNomJeu[strlen(inputNomJeu) - 1] = '\0';  
+                    }
+
+
+                    if(strlen(inputNomJeu) > 25){
+                        sleep(1);
+                        printf("\n\nNom de jeu trop long ! (RAPPEL : nom du jeu doit être au plus de 25 caractères)\n");
+                    }
+                } while(strlen(inputNomJeu) > 25);
+
+                printf("\n\n\n");
+
+                strcpy(op.nomJeu, inputNomJeu);
+
+                strcat(inputParam, "https://");
+                strcat(inputParam, urlConforme(inputNomJeu));
+                strcat(inputParam, ".com");
+
+                strcpy(op.param, inputParam);
+            }
+
+            do{
+                sleep(1);
+                printf("Voulez-vous que votre demande d'opération soit bloquante ou non bloquante, c'est-à-dire en arrière-plan ? :\n( 0 ) Pour rendre l'opération non bloquante.\n( 1 ) Pour rendre l'opération bloquante.\n\n");
+
+                sleep(1);
+                printf("Votre choix : ");
+                scanf("%d", &inputFlag);
+                clear_input_buffer();
+
+                if(inputCodeOp < 1 || inputCodeOp > 6){
+                    sleep(1);
+                    printf("\n\nNuméro choisi invalide ! (RAPPEL : 0 ou 1)\n");
+                }
+            } while(inputCodeOp < 1 || inputCodeOp > 6);
+
+            printf("\n\n\n");
+
+            op.flag = inputFlag;
+
+
+            pthread_create(&thread, NULL, execute_demande, &op);
+
+            if(op.flag == 1){
+                void* result;
+                pthread_join(thread, &result);
+                sleep(1);
+                printf("Valeur de retour de l'opération bloquante n°%d: %d\n\n\n", op.codeOp, *(int*)result);
+            }
+            
+
+            // On vérifie si un thread non bloquant s'est terminé
+
+            if(nbThreadsNonBloquants > 0){
+                // Transformer peut-être en fct
+                for(int i=0; i<nbThreadsNonBloquants; i++){
+                    if(threadsNonBloquants[i].estFini){
+
+                        sleep(1);
+                        printf("[!INFORMATION!] - Opération thread non bloquante de TID : %d s'est terminée. Valeur de retour : %d\n\n\n", threadsNonBloquants[i].tid, threadsNonBloquants[i].result);
+                        if(nbThreadsNonBloquants != 1){
+                            threadsNonBloquants[i] = threadsNonBloquants[nbThreadsNonBloquants - 1];
+                        }
+
+                        threadsNonBloquants[i].estFini = true;
+                        nbThreadsNonBloquants--;
+
+                    }
+                }
+            }
+        }
+    }
 
     do{
 
-        kidPid = waitpid(-1, &status, WNOHANG);
+        // Transformer peut-être en fct
+        for(int i=0; i<nbThreadsNonBloquants; i++){
+            if(threadsNonBloquants[i].estFini){
 
-        for(int i=0; i<nbFilsNonBloquants; i++){
-            if(pidF[i] == kidPid){
+                threadsNonBloquants[i].estFini = true;
 
-                int result;
-                read(resultF[i], &result, sizeof(int));
-                printf("[!INFORMATION!] - Opération fils non bloquante de PID : %d s'est terminée. Valeur de retour : %d\n\n\n", pidF[i], result);
-                if(nbFilsNonBloquants != 1){
-                    // Remplace les éléments qui ne servent plus à la gestion comme c'est terminé.
-                    pidF[i] = pidF[nbFilsNonBloquants - 1];
-                    resultF[i] = resultF[nbFilsNonBloquants - 1];
+                sleep(1);
+                printf("[!INFORMATION!] - Opération thread non bloquante de TID : %d s'est terminée. Valeur de retour : %d\n\n\n", threadsNonBloquants[i].tid, threadsNonBloquants[i].result);
+
+                if(nbThreadsNonBloquants != 1){
+                    threadsNonBloquants[i] = threadsNonBloquants[nbThreadsNonBloquants - 1];
                 }
 
-                nbFilsNonBloquants--;
+                nbThreadsNonBloquants--;
+
             }
         }
-    } while (nbFilsNonBloquants > 0);
+    } while (nbThreadsNonBloquants > 0);
 
 
     // Libérer la mémoire allouée
@@ -69,8 +188,7 @@ int main() {
         free(jeux[i].code);
     }
     free(jeux);
-    free(pidF);
-    free(resultF);
+    free(threadsNonBloquants);
 
     return 0;
 }

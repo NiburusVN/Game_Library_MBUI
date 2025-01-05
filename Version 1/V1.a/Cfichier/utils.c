@@ -176,8 +176,6 @@ int execute_demande(demandeOperation op) {
                             break;
                         }
                     }
-
-                    free(text);
                     break;
                 }
 
