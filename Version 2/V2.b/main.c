@@ -3,15 +3,18 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <pthread.h>
 #include "Hfichier/utils.h"
 #include "Cfichier/utils.c"
 
 // Variables globales pour la gestion des processus et des jeux
-int nbFilsNonBloquants = 0;
-int *resultF = NULL;
-int *pidF = NULL;
 jeu *jeux = NULL;
 int nbJeux = 0;
+
+threadResult* threadsNonBloquants = NULL;
+int nbThreadsNonBloquants = 0;
+
+char memoire[1000];
 
 void clear_input_buffer() {
     int c;
@@ -20,14 +23,11 @@ void clear_input_buffer() {
 
 int main() {
     
-    int status;
-    pid_t kidPid;
-    int res;
-
     bool isLeaving = false;
 
     printf("[!INFORMATION!] - Bienvenue sur votre application de jeux !\n\n");
     while(!isLeaving){
+        pthread_t thread;
         char inputChoix;
         int inputCodeOp;
         int inputFlag;
@@ -109,90 +109,86 @@ int main() {
                 strcpy(op.param, inputParam);
             }
 
-            if(op.codeOp == 3 || op.codeOp == 4){
-                op.flag = 1;
-            }
+            do{
+                sleep(1);
+                printf("Voulez-vous que votre demande d'opération soit bloquante ou non bloquante, c'est-à-dire en arrière-plan ? :\n( 0 ) Pour rendre l'opération non bloquante.\n( 1 ) Pour rendre l'opération bloquante.\n\n");
 
-            else{
-                do{
+                sleep(1);
+                printf("Votre choix : ");
+                scanf("%d", &inputFlag);
+                clear_input_buffer();
+
+                if(inputCodeOp < 1 || inputCodeOp > 6){
                     sleep(1);
-                    printf("Voulez-vous que votre demande d'opération soit bloquante ou non bloquante, c'est-à-dire en arrière-plan ? :\n( 0 ) Pour rendre l'opération non bloquante.\n( 1 ) Pour rendre l'opération bloquante.\n\n");
+                    printf("\n\nNuméro choisi invalide ! (RAPPEL : 0 ou 1)\n");
+                }
+            } while(inputCodeOp < 1 || inputCodeOp > 6);
 
-                    sleep(1);
-                    printf("Votre choix : ");
-                    scanf("%d", &inputFlag);
-                    clear_input_buffer();
+            printf("\n\n\n");
 
-                    if(inputCodeOp < 1 || inputCodeOp > 6){
-                        sleep(1);
-                        printf("\n\nNuméro choisi invalide ! (RAPPEL : 0 ou 1)\n");
-                    }
-                } while(inputCodeOp < 1 || inputCodeOp > 6);
+            op.flag = inputFlag;
 
-                printf("\n\n\n");
 
-                op.flag = inputFlag;
-            }
-
-            res = execute_demande(op);
+            pthread_create(&thread, NULL, execute_demande, &op);
 
             if(op.flag == 1){
-                printf("Valeur de retour de l'opération bloquante n°%d : %d\n\n\n", op.codeOp, res);
+                void* result;
+                pthread_join(thread, &result);
+                sleep(1);
+                printf("Valeur de retour de l'opération bloquante n°%d: %d\n\n\n", op.codeOp, *(int*)result);
             }
             
+
             // On vérifie si un thread non bloquant s'est terminé
 
-            if(nbFilsNonBloquants > 0){
-                kidPid = waitpid(-1, &status, WNOHANG);
+            if(nbThreadsNonBloquants > 0){
+                // Transformer peut-être en fct
+                for(int i=0; i<nbThreadsNonBloquants; i++){
+                    if(threadsNonBloquants[i].estFini){
 
-                for(int i=0; i<nbFilsNonBloquants; i++){
-                    if(pidF[i] == kidPid){
-
-                        int result;
-                        read(resultF[i], &result, sizeof(int));
-                        printf("[!INFORMATION!] - Opération fils non bloquante de PID : %d s'est terminée. Valeur de retour : %d\n\n\n", pidF[i], result);
-                        if(nbFilsNonBloquants != 1){
-                            // Remplace les éléments qui ne servent plus à la gestion comme c'est terminé.
-                            pidF[i] = pidF[nbFilsNonBloquants - 1];
-                            resultF[i] = resultF[nbFilsNonBloquants - 1];
+                        sleep(1);
+                        printf("[!INFORMATION!] - Opération thread non bloquante de TID : %d s'est terminée. Valeur de retour : %d\n\n\n", threadsNonBloquants[i].tid, threadsNonBloquants[i].result);
+                        if(nbThreadsNonBloquants != 1){
+                            threadsNonBloquants[i] = threadsNonBloquants[nbThreadsNonBloquants - 1];
                         }
 
-                        nbFilsNonBloquants--;
+                        threadsNonBloquants[i].estFini = true;
+                        nbThreadsNonBloquants--;
+
                     }
                 }
             }
         }
     }
 
-
     do{
 
-        kidPid = waitpid(-1, &status, WNOHANG);
+        // Transformer peut-être en fct
+        for(int i=0; i<nbThreadsNonBloquants; i++){
+            if(threadsNonBloquants[i].estFini){
 
-        for(int i=0; i<nbFilsNonBloquants; i++){
-            if(pidF[i] == kidPid){
+                threadsNonBloquants[i].estFini = true;
 
-                int result;
-                read(resultF[i], &result, sizeof(int));
-                printf("[!INFORMATION!] - Opération fils non bloquante de PID : %d s'est terminée. Valeur de retour : %d\n\n\n", pidF[i], result);
-                if(nbFilsNonBloquants != 1){
-                    // Remplace les éléments qui ne servent plus à la gestion comme c'est terminé.
-                    pidF[i] = pidF[nbFilsNonBloquants - 1];
-                    resultF[i] = resultF[nbFilsNonBloquants - 1];
+                sleep(1);
+                printf("[!INFORMATION!] - Opération thread non bloquante de TID : %d s'est terminée. Valeur de retour : %d\n\n\n", threadsNonBloquants[i].tid, threadsNonBloquants[i].result);
+
+                if(nbThreadsNonBloquants != 1){
+                    threadsNonBloquants[i] = threadsNonBloquants[nbThreadsNonBloquants - 1];
                 }
 
-                nbFilsNonBloquants--;
+                nbThreadsNonBloquants--;
+
             }
         }
-    } while (nbFilsNonBloquants > 0);
+    } while (nbThreadsNonBloquants > 0);
+
 
     // Libérer la mémoire allouée
     for (int i = 0; i < nbJeux; i++) {
         free(jeux[i].code);
     }
     free(jeux);
-    free(pidF);
-    free(resultF);
+    free(threadsNonBloquants);
 
     return 0;
 }

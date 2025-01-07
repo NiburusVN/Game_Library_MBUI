@@ -14,6 +14,28 @@ extern int *pidF;
 extern jeu *jeux;
 extern int nbJeux;
 
+char* urlConforme(const char* str) {
+    // Allocation dynamique pour la chaîne de résultat
+    char* paramConforme = malloc(strlen(str) + 1);  // +1 pour le caractère de fin de chaîne
+    if (paramConforme == NULL) {
+        perror("malloc");
+        return NULL;
+    }
+
+    int i;
+    for (i = 0; str[i] != '\0'; i++) {
+        if (str[i] == ' ') {  // Si c'est un espace
+            paramConforme[i] = '-';  // Remplacer par un tiret
+        } else {
+            paramConforme[i] = str[i];  // Copier le caractère dans le nom original
+        }
+    }
+
+    paramConforme[i] = '\0';  // Ajouter le caractère de fin de chaîne
+
+    return paramConforme;
+}
+
 // Fonction execute
 // Renvoie 0 si la fonction est bien terminée, sinon -1
 int execute_demande(demandeOperation op) {
@@ -121,11 +143,6 @@ int execute_demande(demandeOperation op) {
                         } else {
                             sleep(1);
                             result = nbJeux;
-
-                            if(op.flag == 1)
-                                printf("%s", text);
-
-                            break;
                         }
                     }
 
@@ -151,6 +168,7 @@ int execute_demande(demandeOperation op) {
                     strcpy(memoire, code);
                     free(code);
 
+                    write(fdMemoire[1], &memoire, sizeof(memoire));
                     result = strlen(memoire);
                     break;
                 }
@@ -288,6 +306,7 @@ int execute_demande(demandeOperation op) {
                 if (op.codeOp == 3) {
                     close(fdMemoire[1]);
                     read(fdMemoire[0], &memoire, sizeof(memoire) - 1);
+                    read(fdResult[0], &result, sizeof(result));
                     close(fdMemoire[0]);
 
                     // On crée un nouveau jeu et on l'ajoute au tableau jeux

@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <stdbool.h>
 
 //structure de jeu
 typedef struct jeu{
@@ -15,8 +16,14 @@ typedef struct demandeOperation{
         int flag;
 }demandeOperation;
 
-char* urlConforme(const char* str);
+typedef struct threadResult{
+        int result;
+        bool estFini;
+        pid_t tid;
+} threadResult;
 
-// fonction execute
+//	fonction execute
 //renvoie 0 si la fonction est bien terminé, sinon -1
-int execute_demande(demandeOperation op);
+void* execute_demande(void* arg);
+
+char* urlConforme(const char* str);
