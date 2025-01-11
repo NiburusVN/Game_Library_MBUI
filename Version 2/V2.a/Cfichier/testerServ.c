@@ -7,6 +7,12 @@
 #include <sys/wait.h>
 #include "../Hfichier/utils.h"
 
+// Déclaration des variables globales
+extern int nbFilsNonBloquants;
+extern int *resultF;
+extern int *pidF;
+extern jeu *jeux;
+extern int nbJeux;
 
 int main(int argc, char *argv[]) {
 

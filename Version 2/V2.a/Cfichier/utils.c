@@ -7,6 +7,7 @@
 #include <sys/wait.h>
 #include "../Hfichier/utils.h"
 
+
 // Variables globales pour la gestion des processus et des jeux
 extern int nbFilsNonBloquants;
 extern int *resultF;
@@ -173,7 +174,9 @@ int execute_demande(demandeOperation op) {
                     break;
                 }
             }
-        } else if (op.codeOp != 3) {
+        } 
+        
+        else if (op.codeOp != 3) {
             close(fdMemoire[1]);
             close(fdMemoire[0]);
         }
