@@ -7,6 +7,11 @@
 #include <sys/wait.h>
 #include "../Hfichier/utils.h"
 
+extern int nbFilsNonBloquants;                                                                                                                                                                                                               extern int *resultF;
+extern int *pidF;
+extern jeu *jeux;
+extern int nbJeux;
+
 char* urlConforme(const char* str) {
     // Allocation dynamique pour la chaîne de résultat
     char* paramConforme = malloc(strlen(str) + 1);  // +1 pour le caractère de fin de chaîne
