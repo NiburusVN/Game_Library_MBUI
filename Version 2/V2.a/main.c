@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include "Hfichier/utils.h"
-#include "Cfichier/utils.c"
 
 // Variables globales pour la gestion des processus et des jeux
 int nbFilsNonBloquants = 0;
