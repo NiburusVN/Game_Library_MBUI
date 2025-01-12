@@ -11,10 +11,16 @@ typedef struct jeu{
 typedef struct demandeOperation{
         int codeOp; //Code de l'opération (cf. Sujet ; 1->Sujet.1.1 ...)
         char nomJeu[25];
-        char Param[200];
+        char param[200];
         int flag;
 }demandeOperation;
 
+//structure de données de Thread
+typedef struct ThreadData{
+    int new_fd;
+    demandeOperation op;
+} ThreadData;
+
 //	fonction execute
 //renvoie 0 si la fonction est bien terminé, sinon -1
-int execute_demande(demandeOperation op);
+void* execute_demande(void* arg);
