@@ -18,7 +18,6 @@ void clear_input_buffer() {
 }
 
 int main() {
-    
     int status;
     pid_t kidPid;
     int res;
@@ -26,7 +25,8 @@ int main() {
     bool isLeaving = false;
 
     printf("[!INFORMATION!] - Bienvenue sur votre application de jeux !\n\n");
-    while(!isLeaving){
+
+    while (!isLeaving) {
         char inputChoix;
         int inputCodeOp;
         int inputFlag;
@@ -39,63 +39,65 @@ int main() {
         sleep(1);
         printf("Votre choix : ");
 
-        scanf("%c", &inputChoix);
+        if (scanf("%c", &inputChoix) != 1) {
+            fprintf(stderr, "Erreur lors de la lecture du choix.\n");
+            exit(EXIT_FAILURE);
+        }
         clear_input_buffer();
 
         printf("\n\n\n");
 
-        if(inputChoix == 'q'){
+        if (inputChoix == 'q') {
             isLeaving = true;
-        }
-
-
-        else{
+        } else {
             demandeOperation op;
 
             sleep(1);
             printf("[!INFORMATION!] - Veuillez formuler votre demande pour une opération :\n- ( 1 ) Tester si le jeu demandé est présent dans votre bibliothèque\n- ( 2 ) Lister vos jeux disponibles et téléchargés dans votre bibliothèque.\n- ( 3 ) Ajouter un nouvau jeu dans votre bibliothèque.\n- ( 4 ) Supprimer le jeu demandé de votre bibliothèque.\n- ( 5 ) Simuler un combat automatique sur un jeu demandé.\n- ( 6 ) Lancer le jeu demandé.\n\n");
 
-
-            do{
+            do {
                 sleep(1);
                 printf("Votre choix : ");
 
-                scanf("%d", &inputCodeOp);
+                if (scanf("%d", &inputCodeOp) != 1) {
+                    fprintf(stderr, "Erreur lors de la lecture de l'opération.\n");
+                    exit(EXIT_FAILURE);
+                }
                 clear_input_buffer();
 
-                if(inputCodeOp < 1 || inputCodeOp > 6){
+                if (inputCodeOp < 1 || inputCodeOp > 6) {
                     sleep(1);
                     printf("\n\nNuméro d'opération invalide ! (RAPPEL : numéro compris entre 1 et 6)\n");
                 }
-            } while(inputCodeOp < 1 || inputCodeOp > 6);
+            } while (inputCodeOp < 1 || inputCodeOp > 6);
 
             printf("\n\n\n");
 
             op.codeOp = inputCodeOp;
 
-            if(inputCodeOp != 2){
-
-
-                do{
+            if (inputCodeOp != 2) {
+                do {
                     sleep(1);
                     printf("Donnez le nom du jeu que vous voulez choisir pour votre opération :\n\n");
 
                     sleep(1);
                     printf("Votre choix : ");
 
-                    fgets(inputNomJeu, sizeof(inputNomJeu), stdin);
+                    if (fgets(inputNomJeu, sizeof(inputNomJeu), stdin) == NULL) {
+                        fprintf(stderr, "Erreur lors de la lecture du nom du jeu.\n");
+                        exit(EXIT_FAILURE);
+                    }
                     clear_input_buffer();
 
                     if (inputNomJeu[strlen(inputNomJeu) - 1] == '\n') {
                         inputNomJeu[strlen(inputNomJeu) - 1] = '\0';  
                     }
 
-
-                    if(strlen(inputNomJeu) > 25){
+                    if (strlen(inputNomJeu) > 25) {
                         sleep(1);
                         printf("\n\nNom de jeu trop long ! (RAPPEL : nom du jeu doit être au plus de 25 caractères)\n");
                     }
-                } while(strlen(inputNomJeu) > 25);
+                } while (strlen(inputNomJeu) > 25);
 
                 printf("\n\n\n");
 
@@ -108,25 +110,26 @@ int main() {
                 strcpy(op.param, inputParam);
             }
 
-            if(op.codeOp == 3 || op.codeOp == 4){
+            if (op.codeOp == 3 || op.codeOp == 4) {
                 op.flag = 1;
-            }
-
-            else{
-                do{
+            } else {
+                do {
                     sleep(1);
                     printf("Voulez-vous que votre demande d'opération soit bloquante ou non bloquante, c'est-à-dire en arrière-plan ? :\n( 0 ) Pour rendre l'opération non bloquante.\n( 1 ) Pour rendre l'opération bloquante.\n\n");
 
                     sleep(1);
                     printf("Votre choix : ");
-                    scanf("%d", &inputFlag);
+                    if (scanf("%d", &inputFlag) != 1) {
+                        fprintf(stderr, "Erreur lors de la lecture du flag.\n");
+                        exit(EXIT_FAILURE);
+                    }
                     clear_input_buffer();
 
-                    if(inputCodeOp < 1 || inputCodeOp > 6){
+                    if (inputFlag < 0 || inputFlag > 1) {
                         sleep(1);
                         printf("\n\nNuméro choisi invalide ! (RAPPEL : 0 ou 1)\n");
                     }
-                } while(inputCodeOp < 1 || inputCodeOp > 6);
+                } while (inputFlag < 0 || inputFlag > 1);
 
                 printf("\n\n\n");
 
@@ -135,22 +138,23 @@ int main() {
 
             res = execute_demande(op);
 
-            if(op.flag == 1){
+            if (op.flag == 1) {
                 printf("Valeur de retour de l'opération bloquante n°%d : %d\n\n\n", op.codeOp, res);
             }
-            
-            // On vérifie si un thread non bloquant s'est terminé
 
-            if(nbFilsNonBloquants > 0){
+            // On vérifie si un thread non bloquant s'est terminé
+            if (nbFilsNonBloquants > 0) {
                 kidPid = waitpid(-1, &status, WNOHANG);
 
-                for(int i=0; i<nbFilsNonBloquants; i++){
-                    if(pidF[i] == kidPid){
-
+                for (int i = 0; i < nbFilsNonBloquants; i++) {
+                    if (pidF[i] == kidPid) {
                         int result;
-                        read(resultF[i], &result, sizeof(int));
+                        if (read(resultF[i], &result, sizeof(int)) == -1) {
+                            perror("Erreur de lecture du résultat");
+                            exit(EXIT_FAILURE);
+                        }
                         printf("[!INFORMATION!] - Opération fils non bloquante de PID : %d s'est terminée. Valeur de retour : %d\n\n\n", pidF[i], result);
-                        if(nbFilsNonBloquants != 1){
+                        if (nbFilsNonBloquants != 1) {
                             // Remplace les éléments qui ne servent plus à la gestion comme c'est terminé.
                             pidF[i] = pidF[nbFilsNonBloquants - 1];
                             resultF[i] = resultF[nbFilsNonBloquants - 1];
@@ -163,18 +167,18 @@ int main() {
         }
     }
 
-
-    do{
-
+    do {
         kidPid = waitpid(-1, &status, WNOHANG);
 
-        for(int i=0; i<nbFilsNonBloquants; i++){
-            if(pidF[i] == kidPid){
-
+        for (int i = 0; i < nbFilsNonBloquants; i++) {
+            if (pidF[i] == kidPid) {
                 int result;
-                read(resultF[i], &result, sizeof(int));
+                if (read(resultF[i], &result, sizeof(int)) == -1) {
+                    perror("Erreur de lecture du résultat");
+                    exit(EXIT_FAILURE);
+                }
                 printf("[!INFORMATION!] - Opération fils non bloquante de PID : %d s'est terminée. Valeur de retour : %d\n\n\n", pidF[i], result);
-                if(nbFilsNonBloquants != 1){
+                if (nbFilsNonBloquants != 1) {
                     // Remplace les éléments qui ne servent plus à la gestion comme c'est terminé.
                     pidF[i] = pidF[nbFilsNonBloquants - 1];
                     resultF[i] = resultF[nbFilsNonBloquants - 1];
@@ -192,8 +196,6 @@ int main() {
     free(jeux);
     free(pidF);
     free(resultF);
-
-
 
     return 0;
 }
