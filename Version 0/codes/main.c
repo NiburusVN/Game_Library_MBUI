@@ -2,11 +2,13 @@
 #include "Hfichier/utils.h"
 #include <stdio.h>
 
+
+jeu *jeux = NULL;
+int nbJeux = 0;
+char memoire[1000];
+
 int main() {
 
-    jeu *jeux = NULL;
-    int nbJeux = 0;
-    char memoire[1000];
 
     // Exemple avec une seule demande d'ajout
     demandeOperation DeO1 = {1, "Echec", "", 0};
