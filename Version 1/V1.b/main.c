@@ -5,7 +5,7 @@
 #include <sys/wait.h>
 #include <pthread.h>
 #include "Hfichier/utils.h"
-#include "Cfichier/utils.c"
+#include <stdbool.h>
 
 // Variables globales pour la gestion des processus et des jeux
 jeu *jeux = NULL;

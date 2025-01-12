@@ -15,6 +15,12 @@ typedef struct demandeOperation{
         int flag;
 }demandeOperation;
 
+
+extern int nbFilsNonBloquants;                                                                                                                                                                                                               extern int *resultF;
+extern int *pidF;
+extern jeu *jeux;
+extern int nbJeux;
+
 char* urlConforme(const char* str);
 
 //	fonction execute

@@ -7,6 +7,7 @@
 #include <sys/wait.h>
 #include <sys/syscall.h>
 #include "../Hfichier/utils.h"
+#include <pthread.h>
 
 // Variables globales pour la gestion des processus et des jeux
 

@@ -1,11 +1,13 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include <signal.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <sys/stat.h>  // Pour mkfifo
-#include "Cfichier/utils.c"
 #include "Hfichier/utils.h"
 
 // Variables globales pour la gestion des processus et des jeux

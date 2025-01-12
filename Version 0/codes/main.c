@@ -1,7 +1,12 @@
+#define _POSIX_C_SOURCE 200809L
 #include "Hfichier/utils.h"
-#include "Cfichier/utils.c"
+#include <stdio.h>
 
 int main() {
+
+    jeu *jeux = NULL;
+    int nbJeux = 0;
+    char memoire[1000];
 
     // Exemple avec une seule demande d'ajout
     demandeOperation DeO1 = {1, "Echec", "", 0};

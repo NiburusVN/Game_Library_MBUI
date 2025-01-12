@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -7,9 +8,9 @@
 #include "../Hfichier/utils.h"
 
 // Tableau dynamique contenant des jeux et agissant en tant que "B.D.D des jeux possédés par l'utilisateur." 
-jeu *jeux = NULL;
-int nbJeux = 0;
-char memoire[1000];
+extern jeu *jeux;
+extern int nbJeux;
+extern char memoire[1000];
 
 //	fonction execute
 //renvoie 0 si la fonction est bien terminé, sinon -1

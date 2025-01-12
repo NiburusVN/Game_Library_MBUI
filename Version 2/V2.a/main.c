@@ -8,7 +8,7 @@
 
 // Variables globales pour la gestion des processus et des jeux
 int nbFilsNonBloquants = 0;
-char *resultF = NULL;
+int *resultF = NULL;
 int *pidF = NULL;
 jeu *jeux = NULL;
 int nbJeux = 0;
