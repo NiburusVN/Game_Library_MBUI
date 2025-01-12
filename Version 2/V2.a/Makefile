@@ -1,32 +1,64 @@
-TARGET_EXEC ?= V2.a
+CC ?= gcc
+CFLAGS ?= $(INC_FLAGS) -MMD -MP -O3 -DNDEBUG -Wall -Wextra -pedantic -std=c11 -Wno-unused-parameter
 
-BUILD_DIR ?= ./build
-TARGET_DIR ?= .
-SRC_DIRS ?= .
+EXEC_M = V2.a #main
+EXEC_S = Cfichier/ajouterServ Cfichier/lancerServ Cfichier/listerServ Cfichier/simulerServ Cfichier/supprimerServ Cfichier/testerServ #les servers
 
-SRCS := $(shell find $(SRC_DIRS) -name "*.c")
-OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
-DEPS := $(OBJS:.o=.d)
+ALL = $(EXEC_M) $(EXEC_S)
 
-INC_DIRS := $(shell find $(SRC_DIRS) -type d)
-INC_FLAGS := $(addprefix -I,$(INC_DIRS))
+all: $(ALL)
 
-CFLAGS ?= $(INC_FLAGS) -MMD -MP -O3 -DNDEBUG -Wall -Wextra -pedantic -std=c11 -Wno-unused-parameter -fPIE
-LDFLAGS ?= -pie
+# fichiers executables
+V2.a: main.o Cfichier/utils.o
+	$(CC) -o $@ $^ $(CFLAGS)
 
-$(TARGET_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(MKDIR_P) $(TARGET_DIR)
-	$(CC) $(OBJS) -o $(TARGET_DIR)/$(TARGET_EXEC) $(LDFLAGS)
+Cfichier/ajouterServ: Cfichier/ajouterServ.o 
+	$(CC) -o $@ $^ $(CFLAGS)
 
-$(BUILD_DIR)/%.c.o: %.c
-	$(MKDIR_P) $(dir $@)
-	$(CC) $(CFLAGS) $< -o $@
+Cfichier/lancerServ: Cfichier/lancerServ.o 
+	$(CC) -o $@ $^ $(CFLAGS)
 
-.PHONY: clean
+Cfichier/listerServ: Cfichier/listerServ.o
+	$(CC) -o $@ $^ $(CFLAGS)
+
+Cfichier/simulerServ: Cfichier/simulerServ.o
+	$(CC) -o $@ $^ $(CFLAGS)
+
+Cfichier/supprimerServ: Cfichier/supprimerServ.o 
+	$(CC) -o $@ $^ $(CFLAGS)
+
+Cfichier/testerServ: Cfichier/testerServ.o 
+	$(CC) -o $@ $^ $(CFLAGS)
+
+
+# fichiers .o
+utils.o: Cfichier/utils.c
+	$(CC) $(CFLAGS) -c Cfichier/utils.c
+
+main.o: main.c
+	$(CC) $(CFLAGS) -c main.c
+
+ajouterServ.o: Cfichier/ajouterServ.c
+	$(CC) $(CFLAGS) -c Cfichier/ajouterServ.c
+
+lancerServ.o: Cfichier/lancerServ.c
+	$(CC) $(CFLAGS) -c Cfichier/lancerServ.c
+
+listerServ.o: Cfichier/listerServ.c
+	$(CC) $(CFLAGS) -c Cfichier/listerServ.c
+
+simulerServ.o: Cfichier/simulerServ.c
+	$(CC) $(CFLAGS) -c Cfichier/simulerServ.c
+
+supprimerServ.o: Cfichier/supprimerServ.c
+	$(CC) $(CFLAGS) -c Cfichier/supprimerServ.c
+
+testerServ.o: Cfichier/testerServ.c
+	$(CC) $(CFLAGS) -c Cfichier/testerServ.c
+
 
 clean:
-	$(RM) -r $(BUILD_DIR)
+	rm *.o *.d Cfichier/*o Cfichier/*d 
 
--include $(DEPS)
 
-MKDIR_P ?= mkdir -p
+
