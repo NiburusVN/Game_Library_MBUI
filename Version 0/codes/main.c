@@ -2,14 +2,11 @@
 #include "Hfichier/utils.h"
 #include <stdio.h>
 
-
 jeu *jeux = NULL;
 int nbJeux = 0;
 char memoire[1000];
 
 int main() {
-
-
     // Exemple avec une seule demande d'ajout
     demandeOperation DeO1 = {1, "Echec", "", 0};
     int res = execute_demande(DeO1);
@@ -39,5 +36,12 @@ int main() {
     demandeOperation DeO4 = {4, "Echec", "", 0};
     res = execute_demande(DeO4);
     printf("Résultat : %d \n", res);
+
+    // Libérer la mémoire avant la fin du programme
+    for (int i = 0; i < nbJeux; i++) {
+        free(jeux[i].code);
+    }
+    free(jeux);
+
     return 0;
 }
