@@ -8,7 +8,6 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include "Hfichier/utils.h"
-#include "Cfichier/utils.c"
 
 // Variable globale pour l'état de l'exécution
 bool estBloquant = true;
