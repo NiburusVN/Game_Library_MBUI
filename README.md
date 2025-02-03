@@ -14,3 +14,5 @@ Les sous-dossiers sont nommées en Versions (format Vx.y ; x appartenant à l'en
 Il existe un Makefile pour chaque version qui compilera le projet et sortira un exécutable ; dans la Version 2, on simule plusieurs servers, il y aura donc 6 exécutables en plus dans le sous-sous-dossier Cfichier (Version 2/Vx.y/Cfichier/).
 
 ##### Bonne découverte du projet!
+
+(ps: tout est en camel case)
